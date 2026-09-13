@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us · 小组介绍 · Wireframe Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0a0a0a;
+    --gray-1: #4a4a4a;
+    --gray-2: #7d7d7d;
+    --gray-3: #bdbdbd;
+    --gray-4: #e8e8e8;
+    --paper: #f5f5f5;
+    /* 快速下滑曲线：起步快、收尾利落，给"嗖"一下的感觉 */
+    --slide-ease: cubic-bezier(.86, 0, .07, 1);
+  }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body {
+    background-image:
+      linear-gradient(rgba(10,10,10,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10,10,10,.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ============ 全屏翻页容器 ============
+     所有 slide 都绝对定位叠在一起，靠 transform + transition 切换。
+     不再依赖 scroll snap，纯 JS 控制 active index。 */
+  .deck {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 默认所有 slide 都在视口下方 */
+    transform: translateY(100%);
+    /* 快速下滑：0.55s 配合 cubic-bezier(.86,0,.07,1) → 一气呵成 */
+    transition: transform 0.55s var(--slide-ease);
+    will-change: transform;
+    background: var(--paper);  /* slide 自己有纸色背景，遮住下面的 slide */
+  }
+
+  /* 当前页：归位 */
+  .slide.cur {
+    transform: translateY(0);
+    z-index: 2;
+  }
+  /* 上一页（已滑出）：停留视口上方 */
+  .slide.prev {
+    transform: translateY(-100%);
+    z-index: 1;
+  }
+  /* 还没进场的页：留在下方等待 */
+  .slide.next {
+    transform: translateY(100%);
+    z-index: 1;
+  }
+
+  /* 每页内部容器 */
+  .slide-inner {
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    padding: 90px 32px 60px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .slide-tag {
+    position: absolute;
+    top: 22px;
+    left: 32px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gray-3);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  /* ============ 卡片内部：圆形头像占位框 + 三个灰色标签 ============
+     每张卡各一个：头像居中，标签排在头像下方；
+     z-index 2 保证在渐隐蒙版之上；pointer-events none 不挡卡片交互 */
+  .moto-stack .card-face {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding-top: 18px;   /* 略向下让位给左上角姓名 */
+    pointer-events: none;
+  }
+  .moto-stack .card-face .avatar-ring {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    flex: none;
+  }
+  .moto-stack .card-face .avatar-tags {
+    display: flex;
+    gap: 4px;
+  }
+  .moto-stack .card-face .avatar-tags span {
+    font-size: 9px;
+    color: var(--gray-1);
+    border: 1px solid var(--gray-2);
+    border-radius: 999px;
+    padding: 2px 7px;
+    background: #fff;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  /* ============ 子页左上角标识（与来源卡片标识对应） ============
+     组员个人页：A / B / C（对应第二页组员卡片角标）
+     分类详情页：01 ~ 08（对应个人页 marquee 分类卡编号）
+     下移避开顶部导航栏（topbar 高约 63px + 余量） */
+  .sub-letter {
+    position: absolute;
+    top: 78px;
+    left: 32px;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    pointer-events: none;
+  }
+  /* 子页的小字说明挪到字母下方（同样避开导航） */
+  .sub-slide .slide-tag { top: 114px; }
+  .slide-num {
+    position: absolute;
+    top: 22px;
+    right: 32px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gray-2);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .draft-note {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gray-2);
+    text-transform: uppercase;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  /* ============ 顶部导航 ============ */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(245,245,245,.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--gray-3);
+    z-index: 50;
+  }
+  .topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    width: 26px; height: 26px;
+    background: var(--ink);
+    border-radius: 6px;
+    flex: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 26px;
+    font-size: 12px;
+    color: var(--gray-1);
+    letter-spacing: 0.04em;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: inherit;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .2s;
+  }
+  .nav-links a.cur { color: var(--ink); font-weight: 700; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-btn {
+    display: inline-block;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 11px;
+    color: var(--ink);
+    background: transparent;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    line-height: 1;
+  }
+  .nav-btn:hover { background: var(--ink); color: #fff; }
+
+  /* ============ 右侧圆点指示器 ============ */
+  .dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .dots .d {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    cursor: pointer;
+    transition: background .25s, transform .25s;
+  }
+  .dots .d:hover { transform: scale(1.3); }
+  .dots .d.active {
+    background: var(--ink);
+    transform: scale(1.4);
+  }
+
+  /* ============ 底部翻页提示 ============ */
+  .scroll-hint {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gray-2);
+    text-transform: uppercase;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: bounce 1.8s ease-in-out infinite;
+    transition: opacity .3s;
+  }
+  .scroll-hint .arrow {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-right: 1.5px solid var(--gray-1);
+    border-bottom: 1.5px solid var(--gray-1);
+    transform: rotate(45deg);
+  }
+  /* 子页状态：箭头翻转向下，提示"上滚返回" */
+  .scroll-hint.up .arrow { transform: rotate(225deg); }
+  @keyframes bounce {
+    0%, 100% { transform: translate(-50%, 0); opacity: .7; }
+    50%      { transform: translate(-50%, 6px); opacity: 1; }
+  }
+
+  /* 图片占位 */
+  .ph {
+    background: #fff;
+    border: 1px solid var(--gray-3);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-3);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ============ Slide 0 · Welcome ============ */
+  .welcome-slide .slide-inner {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 90px;
+  }
+  .welcome-title {
+    font-size: clamp(56px, 9vw, 110px);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  /* 感叹号单独换圆头字体：Nunito 的 "!" 笔画末端为全圆角，避免方正边缘 */
+  .welcome-title .ch.bang {
+    font-family: 'Nunito', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+  }
+  .welcome-rule {
+    width: 44px;
+    height: 1px;
+    background: var(--ink);
+    margin: 26px auto 20px;
+    transform-origin: center;
+  }
+  .welcome-sub {
+    font-size: 12px;
+    letter-spacing: 5px;
+    color: var(--gray-1);
+    text-transform: uppercase;
+  }
+  .welcome-corners span {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--gray-2);
+    border-style: solid;
+    border-width: 0;
+  }
+  .welcome-corners .tl { top: 78px;  left: 48px;  border-top-width: 1px; border-left-width: 1px; }
+  .welcome-corners .tr { top: 78px;  right: 48px; border-top-width: 1px; border-right-width: 1px; }
+  .welcome-corners .bl { bottom: 44px; left: 48px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .welcome-corners .br { bottom: 44px; right: 48px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  /* ============ 欢迎页动效 ============
+     字母逐个从遮罩中升起（错峰 60ms）→ 感叹号周期性弹跳 →
+     分隔线横向展开 → about us 字距收拢 → 四角边框线浮现 */
+  .welcome-title .chw { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  .welcome-title .ch  { display: inline-block; transform: translateY(115%); will-change: transform; }
+  .welcome-slide.play .welcome-title .ch {
+    animation: ch-in .75s cubic-bezier(.22, 1, .36, 1) both;
+    animation-delay: var(--d, 0s);
+  }
+  /* "!" 入场后再叠加无限弹跳 */
+  .welcome-slide.play .welcome-title .ch.bang {
+    animation:
+      ch-in   .75s cubic-bezier(.22, 1, .36, 1) both,
+      ch-bang 2.4s 1.8s cubic-bezier(.45, 0, .55, 1) infinite;
+  }
+  @keyframes ch-in {
+    from { transform: translateY(115%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes ch-bang {
+    0%, 100% { transform: translateY(0)    scale(1); }
+    10%      { transform: translateY(-14%) scale(1.08); }
+    22%      { transform: translateY(0)    scale(1); }
+    34%      { transform: translateY(-7%)  scale(1.04); }
+    46%      { transform: translateY(0)    scale(1); }
+  }
+  .welcome-slide.play .welcome-rule { animation: rule-in .9s .85s cubic-bezier(.22, 1, .36, 1) both; }
+  @keyframes rule-in {
+    from { transform: scaleX(0); opacity: 0; }
+    to   { transform: scaleX(1); opacity: 1; }
+  }
+  .welcome-slide.play .welcome-sub { animation: sub-in 1.1s 1s both; }
+  @keyframes sub-in {
+    from { opacity: 0; letter-spacing: 18px; }
+    to   { opacity: 1; letter-spacing: 5px; }
+  }
+  .welcome-slide.play .welcome-corners span { animation: corner-in .7s 1.25s both; }
+  @keyframes corner-in {
+    from { opacity: 0; transform: scale(.4); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ============ Slide 1 · Team 组员（三人堆叠卡片） ============ */
+  .moto-slide .slide-inner { justify-content: space-between; padding-top: 100px; }
+  .moto-hero {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .moto-hero h1 {
+    font-size: clamp(36px, 4.6vw, 56px);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .moto-hero h1 .row2 {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .moto-hero h1 .row2 .lib { margin-right: 0; }
+  .moto-hero .sub {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--gray-1);
+  }
+  /* 占位文本：纯黑字，无按钮背景，不可交互 */
+  .moto-btn {
+    margin-top: 14px;
+    background: none;
+    color: var(--ink);
+    border: 0;
+    padding: 0;
+    font-size: 12px;
+    letter-spacing: .08em;
+    cursor: default;
+    pointer-events: none;
+  }
+  /* 堆叠卡片：3 张 4:3 竖版随意叠压（不对称旋转 + 上下错落）
+     hover 交互：
+     1. 悬停的卡 → 向上抽出一段距离并浮到最顶层
+     2. 其余卡 → 叠一层纸色渐隐蒙版，压低存在感 */
+  .moto-stack {
+    position: relative;
+    height: 260px;
+    margin: 0 auto;
+    flex: none;
+    align-self: center;
+    width: 100%;
+    max-width: 1100px;
+    overflow: hidden;
+  }
+  .moto-stack .card {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 180px;      /* 4:3 竖向长方形 */
+    height: 240px;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    margin-left: -90px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04);
+    /* 基础位移/旋转走 CSS 变量，hover 只改写 transform */
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--r, 0deg));
+    transition: transform 0.4s cubic-bezier(.22, 1, .36, 1), box-shadow 0.35s;
+    cursor: pointer;
+  }
+  /* 卡片角标：A / B / C，标识每张卡对应的子页
+     放在渐隐蒙版（::after）之上：z-index 2 */
+  .moto-stack .card::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    z-index: 2;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+  }
+  /* 渐隐蒙版：盖在卡片上的纸色渐变，默认透明 */
+  .moto-stack .card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;       /* 连边框一起盖住 */
+    background: linear-gradient(to bottom,
+      rgba(245,245,245,.38),
+      rgba(245,245,245,.72));
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  /* 只要 stack 内有卡被悬停：其余未选中的卡亮起蒙版 */
+  .moto-stack:hover .card:not(:hover)::after { opacity: 1; }
+  /* 抽出：保持原位移/旋转，Y 轴上移 52px，z-index 跳到最高 */
+  .moto-stack .card:hover {
+    transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 52px)) rotate(var(--r, 0deg));
+    z-index: 30;
+    box-shadow: 0 10px 26px rgba(0,0,0,.14);
+  }
+  /* 随意堆叠：中心距不等、上下错落、旋转不对称 */
+  .moto-stack .c1 { --tx: -140px; --ty: 72px;  --r: -9deg;  z-index: 10; }
+  .moto-stack .c2 { --tx:  -20px; --ty: 105px; --r:  5deg;  z-index: 16; }
+  .moto-stack .c3 { --tx:  120px; --ty: 46px;  --r: -3deg;  z-index: 5;  }
+
+  /* 卡片内的组员姓名：置于左上角 A/B/C 角标正下方
+     填入真实照片后可整块删除；z-index 2 保证在渐隐蒙版之上 */
+  .moto-stack .card-name {
+    position: absolute;
+    top: 32px;
+    left: 12px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+    pointer-events: none;
+  }
+  .moto-stack .card-name b {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: .04em;
+  }
+  .moto-stack .card-name i {
+    font-style: normal;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    color: var(--gray-2);
+    text-transform: uppercase;
+  }
+
+  /* ============ 组员个人页 · 分类横滚 marquee（由 JS 按数据生成） ============ */
+  .rue-clean {
+    padding: 0 !important;
+    justify-content: center;
+  }
+  /* ============ 分类 marquee · 手动驱动横滚 ============
+     - 默认静止
+     - 鼠标进入 marquee 区域 → 启动横向滚动
+     - 鼠标悬停在某张 item 上 → 滚动暂停 + 放大该图 + 其他缩小
+     - 由 JS 控制 animation-play-state */
+  .marquee {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    /* 两端渐隐：左右各 8% 透明，给放大图留显示空间 */
+    -webkit-mask-image: linear-gradient(to right,
+      transparent 0,
+      #000 8%,
+      #000 92%,
+      transparent 100%);
+    mask-image: linear-gradient(to right,
+      transparent 0,
+      #000 8%,
+      #000 92%,
+      transparent 100%);
+  }
+  .marquee-track {
+    display: flex;
+    gap: var(--mq-g);
+    /* 卡宽 / 间距变量：无缝循环距离 = 一组 4 张卡的宽度，改数量或尺寸时同步改 keyframes */
+    --mq-w: 200px;
+    --mq-g: 22px;
+    width: max-content;
+    flex-shrink: 0;
+    /* 进入页面就看到一整排：起始没有 padding 偏移，第一张图直接铺在视口最左 */
+    animation: marquee-scroll 40s linear infinite;
+    animation-play-state: running;     /* 常态滚动，仅悬停图片时由 JS 暂停 */
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+  @keyframes marquee-scroll {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(calc((var(--mq-w) * 4 + var(--mq-g) * 4) * -1), 0, 0); }
+  }
+
+  .marquee-item {
+    flex: none;
+    width: 200px;
+    aspect-ratio: 3 / 4;
+    background: #fff;
+    border: 1px solid var(--gray-3);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-3);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;            /* 让 scale 后的元素建立层叠上下文 */
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 0.4s cubic-bezier(.25,.46,.45,.94),
+                box-shadow 0.35s;
+  }
+  /* 鼠标进入 marquee：所有兄弟图缩小到 0.9，制造焦点对比 */
+  .marquee:hover .marquee-item {
+    transform: scale(0.9);
+  }
+  /* 被选中的图放大 120% + 浮起来（特异性覆盖上面的规则） */
+  .marquee:hover .marquee-item:hover {
+    transform: scale(1.2);
+    z-index: 5;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  }
+
+  /* ============ 悬停注释卡（裸文本：左对齐、无外框、自下而上浮出） ============
+     参考图风格：纯文本占位注释，无背景/边框/阴影/小三角
+     - 与选中卡片左对齐（tip.left = 卡片左边缘）
+     - 浮在卡片顶部上方（tip.top = 卡片顶 - tip高 - gap）
+     - 初始 transform translateY(calc(100% + 40px)) 把它推到"卡片内偏下"位置
+       → 加入 .show 后 transition 到 translateY(0)，从卡片内浮上来
+     - 不放进 .marquee-item：父级 scale(1.2) 会连带缩放文本 */
+  .card-tip {
+    position: absolute;
+    z-index: 20;
+    pointer-events: none;           /* 不挡 elementFromPoint 判定 */
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    text-align: left;
+    color: var(--ink);
+    white-space: nowrap;            /* 注释卡横向不折行 */
+    opacity: 0;
+    /* 起始位置：相对自身下移一段（卡片内中下），加入 .show 后浮到目标位置 */
+    transform: translateY(calc(100% + 40px));
+    transition:
+      opacity 0.32s ease,
+      transform 0.55s cubic-bezier(.22, 1, .36, 1);
+  }
+  .card-tip.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* 第一行：编号，如 (01) —— 与后两行同字号同字重，仅颜色区分 */
+  .card-tip .t1 {
+    font-size: 13px;
+    color: var(--gray-2);
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  /* 第二行：标题（如 TEXT 文本）*/
+  .card-tip .t2 {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+  }
+  /* 第三行：补充描述（如 TEXTEXT 文本本文） —— 与上一行完全一致 */
+  .card-tip .t3 {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .rue-row .small {
+    font-size: 9px;
+    color: var(--gray-2);
+    line-height: 1.5;
+    max-width: 200px;
+    text-align: center;
+    margin-left: auto;
+  }
+
+  /* ============ 分类详情页 · 非对称四角卡片布局（参考图 1:1 复刻，由 JS 按数据生成） ============
+     参考图基准：1280×720 视口
+     关键对齐规则（与原图完全对应）：
+     - 01（竖）：文本 TOP=卡 TOP；left ≈ 卡内 70%；向右溢出卡外
+     - 02（横）：文本 BOTTOM=卡 TOP（贴在卡上方）；left 略向左溢出卡外
+     - 03（横）：文本 BOTTOM=卡 BOTTOM；right=0；向左延伸到卡内 ~60%
+     - 04（竖）：文本 BOTTOM=卡 BOTTOM；在卡内右下角（8px 内边距）
+
+     画布直接铺满 slide (100% × 100vh)，百分比以视口为基准 → 比例与原图直接对应 */
+  .zhen-slide { padding: 0; }
+  /* 画布收窄：与一~三页内容同宽（1200px）并水平居中，
+     百分比基于画布而非视口 → 页面两边留出与其他页一致的空白边距 */
+  .zhen-canvas {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+  }
+  .zhen-card {
+    position: absolute;
+    overflow: visible;       /* 允许标签溢出卡片边界 */
+  }
+  /* 占位块与第一~三页统一：白底 + 细灰边框（覆盖全局 .ph 的灰底由下方样式决定） */
+  .zhen-card .ph {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border: 1px solid var(--gray-3);
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+  .zhen-card .lbl {
+    position: absolute;
+    z-index: 2;              /* 浮在图片占位块上层，遮挡一部分图片 */
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* 01 · 竖向长方形 · 左上
+     参考图: 左≈80/1280=6.25%, 顶≈78/720=10.83%, 宽≈178/1280=13.9%, 高≈243/720=33.75% */
+  .zhen-card.c01 { top: 8.33%;  left: 8.33%;  width: 16.67%; height: 33.33%; }
+  /* 文本压在图片上层：top 略入卡内，"01" 在卡内右半，整行向右溢出 */
+  .zhen-card.c01 .lbl { top: 5%; left: 60%; }
+
+  /* 02 · 横向长方形 · 中下方偏左
+     参考图: 左≈340/1280=26.56%, 顶≈390/720=54.17%, 宽≈395/1280=30.86%, 高≈187/720=25.97% */
+  .zhen-card.c02 { top: 50%;    left: 25%;    width: 33.33%; height: 25%; }
+  /* 文本压在图片上层：top 略入卡内，左端稍溢出卡外，整体横跨图片上部 */
+  .zhen-card.c02 .lbl { top: 6%; left: -3%; }
+
+  /* 03 · 横向长方形 · 右上
+     参考图: 左≈768/1280=60.0%, 顶≈130/720=18.06%, 宽≈197/1280=15.39%, 高≈140/720=19.44% */
+  .zhen-card.c03 { top: 16.67%; left: 58.33%; width: 25%;    height: 25%; }
+  /* 文本压在图片上层：bottom 略入卡内，右下锚定 → 起点在卡内, 整行向右溢出 */
+  .zhen-card.c03 .lbl { bottom: 4%; right: -4px; padding-right: 4px; }
+
+  /* 04 · 竖向长方形 · 右下
+     参考图: 左≈1015/1280=79.30%, 顶≈411/720=57.08%, 宽≈187/1280=14.61%, 高≈210/720=29.17% */
+  .zhen-card.c04 { top: 58.33%; left: 75%;    width: 16.67%; height: 33.33%; }
+  /* 文本压在图片上层：卡内右下角，bottom 略入卡内 */
+  .zhen-card.c04 .lbl { bottom: 4%; right: 8px; }
+
+  /* 中央文本块：落在第 4 列线（33.33%）与第 5 行线（33.33%）交点，居中留白区 */
+  .zhen-center {
+    position: absolute;
+    top: 33.33%;
+    left: 33.33%;
+    width: auto;
+    max-width: 25%;
+    color: var(--ink);
+  }
+  .zhen-center .title {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+  .zhen-center .sub {
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  /* ============ 联系方式详情页（极简版式） ============
+     无图片框、无其他文字：仅标题 + 电话/QQ/邮箱三栏 */
+  .contact-canvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .contact-box {
+    width: 100%;
+    max-width: 560px;
+    padding: 0 32px;
+    color: var(--ink);
+  }
+  .contact-box .title {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 40px;
+  }
+  .contact-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .contact-fields .cf {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 1px solid var(--gray-2);
+    padding-bottom: 10px;
+  }
+  .contact-fields .k {
+    font-size: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .contact-fields .v {
+    font-size: 12px;
+    color: var(--gray-1);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .contact-fields .fill {
+    flex: 1;                 /* 填写占位区：填入号码/邮箱后可删 */
+    min-width: 120px;
+    height: 16px;
+  }
+  /* 左下角：NAME + caption — 参考图 ~80,613 → 80/1280=6.25%, 613/720=85.14% */
+  /* 左下角 NAME 块：左边与 01 同线（8.33%），底边与 04 底边同线（91.67%） */
+  .zhen-name {
+    position: absolute;
+    bottom: 8.33%;
+    left: 8.33%;
+    color: var(--ink);
+  }
+  .zhen-name .nm {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .zhen-name .cap {
+    margin-top: 6px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--gray-2);
+    text-transform: uppercase;
+  }
+
+  /* 响应式 */
+  @media (max-width: 820px) {
+    .nav-links { display: none; }
+    .marquee-item { width: 140px; }
+    /* 手机端只需覆盖变量，循环距离由 keyframes 统一计算：
+       一组 4 张 = 4×140 + 4×14 = 616px */
+    .marquee-track { --mq-w: 140px; --mq-g: 14px; animation-duration: 28s; }
+    /* 移动端同样按 8.33% 网格吸附 */
+    .zhen-card.c01 { top: 8.33%;  left: 8.33%;  width: 33.33%; height: 25%; }
+    .zhen-card.c02 { top: 58.33%; left: 8.33%;  width: 58.33%; height: 16.67%; }
+    .zhen-card.c03 { top: 41.67%; left: 58.33%; width: 33.33%; height: 16.67%; }
+    .zhen-card.c04 { top: 66.67%; left: 58.33%; width: 33.33%; height: 25%; }
+    .zhen-center { max-width: 70%; top: 33.33%; left: 8.33%; }
+    .zhen-center .title { font-size: 26px; }
+    .zhen-center .sub { font-size: 17px; }
+    .zhen-name .nm { font-size: 17px; }
+    .zhen-name .cap { font-size: 10px; }
+    .zhen-card .lbl { font-size: 14px; }
+    .contact-box .title { font-size: 26px; margin-bottom: 28px; }
+    .contact-fields { gap: 20px; }
+    .contact-fields .k { font-size: 17px; }
+    .contact-fields .v { font-size: 10px; }
+    .moto-stack { height: 165px; }
+    /* 小卡：头像缩小，三个标签竖排避免横向溢出 */
+    .moto-stack .card-face { gap: 7px; padding-top: 14px; }
+    .moto-stack .card-face .avatar-ring { width: 46px; height: 46px; }
+    .moto-stack .card-face .avatar-tags { flex-direction: column; gap: 3px; align-items: center; }
+    .moto-stack .card-face .avatar-tags span { font-size: 7px; padding: 1px 6px; }
+    .moto-stack .card { width: 100px; height: 133px; margin-left: -50px; }
+    .moto-stack .c1 { --tx: -78px; --ty: 44px; --r: -9deg; }
+    .moto-stack .c2 { --tx:  -8px; --ty: 64px; --r:  5deg; }
+    .moto-stack .c3 { --tx:  62px; --ty: 30px; --r: -3deg; }
+    .moto-stack .card:hover { transform: translate(var(--tx), calc(var(--ty) - 34px)) rotate(var(--r)); }
+    /* 小卡姓名跟随缩小：字号略减，位置贴近角标下方 */
+    .moto-stack .card-name { top: 26px; left: 8px; }
+    .moto-stack .card-name b { font-size: 10px; }
+    .moto-stack .card-name i { font-size: 7px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="draft-note">CAA · DSSD · Class 2</div>
+
+<!-- ============ 顶部导航 ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="nav-logo"></div>
+    <nav class="nav-links">
+      <a href="#sec-welcome" class="cur" data-go="0">Welcome</a>
+      <a href="#sec-moto" data-go="1">Team 组员</a>
+    </nav>
+    <a class="nav-btn" href="http://caa-riss.com/" target="_blank" rel="noopener noreferrer">CAA-DSSD</a>
+  </div>
+</div>
+
+<!-- ============ 右侧圆点指示器 ============ -->
+<div class="dots" id="dots">
+  <div class="d active" data-go="0" title="Welcome"></div>
+  <div class="d"        data-go="1" title="Team"></div>
+</div>
+
+<!-- ============ 底部翻页提示 ============ -->
+<div class="scroll-hint" id="scrollHint">
+  <span id="hintLabel">Scroll Down</span> <span class="arrow"></span>
+</div>
+
+<!-- ============ 全屏翻页容器 ============ -->
+<div class="deck" id="deck">
+
+  <!-- ========== Slide 0 · Welcome ========== -->
+  <section class="slide welcome-slide play cur" id="sec-welcome">
+    <div class="slide-inner">
+      <div class="slide-tag">Section 01 / Welcome</div>
+      <div class="slide-num">01 / 02</div>
+
+      <h1 class="welcome-title" aria-label="WELCOME!">
+        <span class="chw"><span class="ch" style="--d:0s">W</span></span><span class="chw"><span class="ch" style="--d:.06s">E</span></span><span class="chw"><span class="ch" style="--d:.12s">L</span></span><span class="chw"><span class="ch" style="--d:.18s">C</span></span><span class="chw"><span class="ch" style="--d:.24s">O</span></span><span class="chw"><span class="ch" style="--d:.30s">M</span></span><span class="chw"><span class="ch" style="--d:.36s">E</span></span><span class="chw"><span class="ch bang" style="--d:.52s">!</span></span>
+      </h1>
+      <div class="welcome-rule"></div>
+      <p class="welcome-sub">About Us 三人小组</p>
+
+      <div class="welcome-corners" aria-hidden="true">
+        <span class="tl"></span>
+        <span class="tr"></span>
+        <span class="bl"></span>
+        <span class="br"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Slide 1 · Team 组员 ========== -->
+  <section class="slide moto-slide next" id="sec-moto">
+    <div class="slide-inner">
+      <div class="slide-tag">Section 02 / Team 组员</div>
+      <div class="slide-num">02 / 02</div>
+
+      <div class="moto-hero">
+        <h1>
+          Meet the Team
+          <span class="row2">
+            <span class="lib">认识</span>
+            <span>我们的三位组员</span>
+          </span>
+        </h1>
+        <p class="sub">点击组员卡片，进入 TA 的个人介绍页 · Click a card to view the member profile.</p>
+        <span class="moto-btn" aria-disabled="true">-认识组员-</span>
+      </div>
+
+      <div class="moto-stack">
+        <!-- 三张卡各对应一位组员的个人介绍页：data-sub = 组员编号 0/1/2
+             卡内：左上角 A/B/C 角标 + 姓名；中间圆形头像占位框 + 三个灰色标签 -->
+        <div class="card c1" role="button" tabindex="0" data-sub="0" data-label="A" aria-label="打开 组员一 的个人介绍页"><span class="card-name"><b>组员一</b><i>Member One</i></span><span class="card-face"><span class="avatar-ring"></span><span class="avatar-tags"><span>标签1</span><span>标签2</span><span>标签3</span></span></span></div>
+        <div class="card c2" role="button" tabindex="0" data-sub="1" data-label="B" aria-label="打开 组员二 的个人介绍页"><span class="card-name"><b>组员二</b><i>Member Two</i></span><span class="card-face"><span class="avatar-ring"></span><span class="avatar-tags"><span>标签1</span><span>标签2</span><span>标签3</span></span></span></div>
+        <div class="card c3" role="button" tabindex="0" data-sub="2" data-label="C" aria-label="打开 组员三 的个人介绍页"><span class="card-name"><b>组员三</b><i>Member Three</i></span><span class="card-face"><span class="avatar-ring"></span><span class="avatar-tags"><span>标签1</span><span>标签2</span><span>标签3</span></span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 组员个人页（分类 marquee）与分类详情页（四图排版）
+       由下方脚本顶部的 MEMBERS / CATS 数据配置自动生成，
+       修改文案或增删分类只需改数据，无需写 HTML -->
+
+</div>
+
+<script>
+  (function () {
+    const deck = document.getElementById('deck');
+
+    /* ============ 内容数据（About Us 主题） ============
+       整站文案集中在这两份数据里：改姓名 / 职位 / 分类 / 概述注释，
+       再把图片填进各占位白框，即可得到完整网站。中英一一对应。 */
+    const MEMBERS = [
+      { letter: 'A', zh: '组员一', en: 'Member One' },
+      { letter: 'B', zh: '组员二', en: 'Member Two' },
+      { letter: 'C', zh: '组员三', en: 'Member Three' },
+    ];
+    const CATS = [
+      { n: '01', zh: '专业技能',   en: 'Skills',  tip: '技能栈占位说明 Skills placeholder' },
+      { n: '02', zh: '兴趣爱好',   en: 'Hobbies', tip: '爱好占位说明 Hobbies placeholder' },
+      { n: '03', zh: '喜欢的音乐', en: 'Music',   tip: '歌单占位说明 Music placeholder' },
+      { n: '04', zh: '联系方式',   en: 'Contact', tip: '联系占位说明 Contact placeholder' },
+    ];
+
+    /* ============ 动态生成子页（在捕获 slides 列表之前执行） ============
+       1) 组员个人页 ×3：水平滚动的分类卡 marquee，悬停显示分类概述注释
+          → 索引 2 / 3 / 4（= MEMBER_SUB_BASE + 组员编号）
+       2) 分类详情页 ×3×4：非对称四图排版，简介文字浮于图片上方
+          → 索引 5 起连续排列（= DETAIL_BASE + 组员编号×CAT_COUNT + 分类编号）
+       注意：必须先全部生成组员页，再连续生成详情页——
+       若交错排列（A页→A详情→B页→B详情…），跳转公式会全部错位 */
+    // —— 第一段：3 个组员个人页（4 张分类卡 ×2 份循环补位，与原 marquee 结构一致）——
+    MEMBERS.forEach(function (m, mi) {
+      const items = CATS.map(function (c, ci) {
+        return '<div class="marquee-item" data-cat="' + ci + '"'
+          + ' data-t1="(' + c.n + ')"'
+          + ' data-t2="' + c.zh + ' ' + c.en + '"'
+          + ' data-t3="' + c.tip + '">'
+          + c.n + ' · ' + c.en + ' ' + c.zh
+          + '</div>';
+      }).join('');
+      const memberSec = document.createElement('section');
+      memberSec.className = 'slide rue-slide sub-slide next';
+      memberSec.id = 'sec-member-' + m.letter;
+      memberSec.dataset.member = mi;
+      memberSec.innerHTML =
+        '<div class="slide-inner rue-clean">'
+        + '<div class="sub-letter">' + m.letter + '</div>'
+        + '<div class="slide-tag">Section 02 / ' + m.zh + ' ' + m.en + '</div>'
+        + '<div class="marquee">'
+        + '<div class="marquee-track">' + items.repeat(4) + '</div>'
+        + '<div class="card-tip" aria-hidden="true"><div class="t1"></div><div class="t2"></div><div class="t3"></div></div>'
+        + '</div>'
+        + '</div>';
+      deck.appendChild(memberSec);
+    });
+
+    // —— 第二段：12 个分类详情页，按组员连续排列 ——
+    MEMBERS.forEach(function (m, mi) {
+      CATS.forEach(function (c, ci) {
+        const d = document.createElement('section');
+        d.className = 'slide zhen-slide sub-slide zhen-sub next';
+        d.id = 'sec-detail-' + m.letter + '-' + c.n;
+        d.dataset.member = mi;
+        d.dataset.cat = ci;
+        // 联系方式页：极简版式 —— 只保留标题 + 电话/QQ/邮箱三栏
+        if (c.en === 'Contact') {
+          d.className += ' contact-detail';
+          d.innerHTML =
+            '<div class="zhen-canvas contact-canvas">'
+            + '<div class="contact-box">'
+            + '<h2 class="title">' + c.zh + ' ' + c.en + '</h2>'
+            + '<div class="contact-fields">'
+            + '<div class="cf"><span class="k">电话</span><span class="v">Tel</span><span class="fill"></span></div>'
+            + '<div class="cf"><span class="k">QQ</span><span class="v">QQ</span><span class="fill"></span></div>'
+            + '<div class="cf"><span class="k">邮箱</span><span class="v">Email</span><span class="fill"></span></div>'
+            + '</div>'
+            + '</div>'
+            + '</div>';
+          deck.appendChild(d);
+          return;
+        }
+        const cards = ['c01', 'c02', 'c03', 'c04'].map(function (cls, k) {
+          return '<div class="zhen-card ' + cls + '"><div class="ph"></div>'
+            + '<div class="lbl">0' + (k + 1) + ' ' + c.en + '<br>' + c.zh + ' · 图片说明占位</div></div>';
+        }).join('');
+        d.innerHTML =
+          '<div class="zhen-canvas">'
+          + '<div class="sub-letter">' + c.n + '</div>'
+          + cards
+          + '<div class="zhen-center">'
+          + '<h2 class="title">' + c.zh + ' ' + c.en + '</h2>'
+          + '<p class="sub">这是' + c.zh + '分类</p>'
+          + '</div>'
+          + '<div class="zhen-name">'
+          + '<div class="nm">' + m.zh + ' ' + m.en + '</div>'
+          + '<div class="cap">Member ' + m.letter + ' / ' + c.n + ' ' + c.en + '</div>'
+          + '</div>'
+          + '</div>';
+        deck.appendChild(d);
+      });
+    });
+
+    const slides = deck.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('#dots .d');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const hint = document.getElementById('scrollHint');
+    const hintLabel = document.getElementById('hintLabel');
+
+    const MAIN_COUNT = 2;         // 主流程页数：索引 0-1（Welcome / Team）
+    const MEMBER_SUB_BASE = 2;    // 组员个人页 A/B/C：索引 2-4（点击第二页组员卡片进入）
+    const DETAIL_BASE = 5;        // 分类详情页：索引 5 起，每组员 8 页（点击个人页 marquee 分类卡进入）
+    const CAT_COUNT = CATS.length;
+
+    function isMemberSub(idx) { return idx >= MEMBER_SUB_BASE && idx < DETAIL_BASE; }
+    function isDetailSub(idx) { return idx >= DETAIL_BASE; }
+    function isSub(idx)       { return idx >= MEMBER_SUB_BASE; }
+    let detailReturn = 2;         // 分类详情页的上滚返回目标（进入时记录来源组员页）
+
+    let cur = 0;       // 当前 slide index
+    let busy = false;  // 切页冷却锁
+    let updateMarquee = function () {};  // marquee 状态同步（下方赋值）
+
+    /* ============ 导航目标计算 ============
+       滚轮/触摸/键盘只在线性主流程（0-1）内移动；
+       组员个人页（A/B/C）：上滚 → 回组员列表页（Team），下滚 → 无操作；
+       分类详情页：上滚 → 回到进入时的来源组员页，下滚 → 无操作 */
+    function navTarget(dir) {
+      if (isDetailSub(cur))  return dir < 0 ? detailReturn : null;
+      if (isMemberSub(cur))  return dir < 0 ? 1 : null;
+      const n = cur + dir;
+      return (n >= 0 && n < MAIN_COUNT) ? n : null;
+    }
+
+    /* ============ 快速下滑切页核心 ============
+       direction: +1 向下切（当前→上一，下一→当前），当前 translateY(-100%)
+       direction: -1 向上切，当前 translateY(100%)，上一从 -100% 回到 0 */
+    function goTo(idx) {
+      if (busy) return;
+      if (idx < 0 || idx >= slides.length) return;
+      if (idx === cur) return;
+      busy = true;
+
+      const direction = idx > cur ? 1 : -1;
+      const outgoing = slides[cur];   // 要离开的
+      const incoming = slides[idx];    // 要进入的
+
+      if (direction === 1) {
+        // 向下：当前 → translateY(-100%)，新页 → translateY(0)
+        incoming.classList.remove('next', 'prev');
+        incoming.classList.add('cur');
+        outgoing.classList.remove('cur');
+        outgoing.classList.add('prev');
+      } else {
+        // 向上：当前 → translateY(100%)，新页 → translateY(0)
+        incoming.classList.remove('next', 'prev');
+        incoming.classList.add('cur');
+        outgoing.classList.remove('cur');
+        outgoing.classList.add('next');
+      }
+
+      // 更新圆点 + 导航（组员个人页 / 分类详情页均归属 Team）
+      const navIdx = idx < MEMBER_SUB_BASE ? idx : 1;
+      dots.forEach((d, i) => d.classList.toggle('active', i === navIdx));
+      navLinks.forEach((a, i) => a.classList.toggle('cur', i === navIdx));
+      // 无更多可下滑页面时（主流程末页 / 各子页）：提示不再隐藏，改为"上滚"
+      const canDown = !isSub(idx) && idx < MAIN_COUNT - 1;
+      hint.classList.toggle('up', !canDown);
+      hintLabel.textContent = canDown ? 'Scroll Down' : 'Scroll Up';
+      hint.style.opacity = '1';
+      hint.style.pointerEvents = 'auto';
+
+      cur = idx;
+
+      // 回到欢迎页时重播入场动效（移除 play → 强制回流 → 重新加上）
+      if (incoming.classList.contains('welcome-slide')) {
+        incoming.classList.remove('play');
+        void incoming.offsetWidth;   // 强制 reflow，重置 animation
+        incoming.classList.add('play');
+      }
+
+      // 动画期间（0.55s 位移）每帧同步 marquee 状态：
+      // slide 在移动、rect 实时变化，必须持续重算而不是只看事件
+      const t0 = performance.now();
+      (function syncFrame() {
+        updateMarquee();
+        if (performance.now() - t0 < 700) requestAnimationFrame(syncFrame);
+      })();
+
+      // 切页动画 0.55s + 一点缓冲后释放锁（不做自动补翻）
+      setTimeout(() => { busy = false; updateMarquee(); }, 600);
+    }
+
+    // 圆点 + 导航点击
+    dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.go)));
+    navLinks.forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      goTo(+a.dataset.go);
+    }));
+
+    /* ============ 第二页组员卡片 → 组员个人页跳转 ============
+       三张卡各对应一位组员的个人页（索引 = MEMBER_SUB_BASE + data-sub） */
+    deck.querySelectorAll('.moto-stack .card').forEach(card => {
+      const open = () => goTo(MEMBER_SUB_BASE + (+card.dataset.sub || 0));
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+    });
+
+    /* ============ 组员页 marquee 分类卡 → 分类详情页跳转 ============
+       data-cat = 分类编号（0-3）；所属组员由最近的 slide 的 data-member 获得；
+       循环补位的重复项 data-cat 相同 → 跳转目标一致。
+       进入时记录来源页（detailReturn），详情页上滚返回进入前的组员页。 */
+    deck.querySelectorAll('.marquee-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const slideEl = item.closest('.slide');
+        const mi = +slideEl.dataset.member;
+        const ci = +item.dataset.cat;
+        if (isNaN(mi) || isNaN(ci)) return;
+        detailReturn = cur;
+        goTo(DETAIL_BASE + mi * CAT_COUNT + ci);
+      });
+    });
+
+    /* ============ 滚轮即时翻页 ============
+       监听挂在 window 上：topbar / hint / dots 都是 fixed 元素、不在 deck 内，
+       挂在 deck 会漏掉鼠标悬停在这些区域时的滚轮事件。
+       busy（动画中）期间直接忽略输入——滚一下翻一页，绝不自动补翻。
+       目标由 navTarget 决定：主流程内线性翻页；子页上滚返回第二页。 */
+    window.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (busy) return;
+      const dir = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+      if (dir === 0) return;
+      const target = navTarget(dir);
+      if (target !== null) goTo(target);
+    }, { passive: false });
+
+    /* ============ 触摸滑动（同样挂 window）============ */
+    let touchStartY = 0;
+    let touchBusy = false;
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchBusy = false;
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (touchBusy) return;
+      const dy = touchStartY - e.touches[0].clientY;
+      if (Math.abs(dy) < 40) return;
+      touchBusy = true;
+      setTimeout(() => touchBusy = false, 650);
+      const target = navTarget(dy > 0 ? 1 : -1);
+      if (target !== null) goTo(target);
+    }, { passive: false });
+
+    /* ============ 键盘支持 ============ */
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        const t = navTarget(1); if (t !== null) goTo(t);
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        const t = navTarget(-1); if (t !== null) goTo(t);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goTo(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goTo(MAIN_COUNT - 1);
+      }
+    });
+
+    /* ============ 初始化所有 slide 状态 ============
+       当前 → cur | 当前之前 → prev (translateY(-100%)) | 之后 → next (translateY(100%)) */
+    slides.forEach((s, i) => {
+      s.classList.remove('cur', 'prev', 'next');
+      if (i < cur)      s.classList.add('prev');
+      else if (i === cur) s.classList.add('cur');
+      else              s.classList.add('next');
+    });
+
+    /* ============ Marquee 驱动（指针位置版 · 多实例） ============
+       常态：一直保持滚动；仅当指针悬停在一张清晰可见的图上时暂停
+       （边缘渐隐区内的图不算选中，鼠标放页面两边仍持续滚动）。
+
+       deck 里每个 .marquee（3 个组员个人页）各建一个控制器，
+       共享一份指针坐标（mousemove 只挂一次）；
+       各控制器用自身 rect + 所属 slideIdx 判定，互不干扰。
+
+       不用 mouseenter/mouseleave：slide 用 transform 位移切换时，
+       页面滑到静止光标下方不会触发 enter/leave 事件——
+       改为 mousemove 记录指针坐标 + getBoundingClientRect/elementFromPoint 实时判定。 */
+    let px = null, py = null;   // 最近一次指针位置（null = 指针不在窗口内）
+    const marqueeControllers = [];
+    deck.querySelectorAll('.marquee').forEach(function (marquee) {
+      const marqueeTrack = marquee.querySelector('.marquee-track');
+      if (!marqueeTrack) return;
+      const marqueeSlideIdx = Array.prototype.indexOf.call(slides, marquee.closest('.slide'));
+      const tip = marquee.querySelector('.card-tip');
+      let pickedItem = null;    // 当前"选中"（悬停且在清晰区）的卡片
+      let tipRaf = 0;           // 注释卡跟随循环
+
+      // 注释卡定位：与选中卡片左对齐、浮在其顶部上方，逐帧跟随（含 1.2 倍缩放动画）
+      function placeTip() {
+        if (!pickedItem || !tip) return;
+        const mr = marquee.getBoundingClientRect();
+        const ir = pickedItem.getBoundingClientRect();
+        const gap = 14;
+        const tipH = tip.offsetHeight;
+        tip.style.left = (ir.left - mr.left) + 'px';
+        tip.style.top  = (ir.top  - mr.top - tipH - gap) + 'px';
+        tipRaf = requestAnimationFrame(placeTip);
+      }
+
+      function setPicked(item) {
+        if (item === pickedItem) return;
+        pickedItem = item;
+        if (!tip) return;
+        if (item) {
+          // 三行注释内容从分类卡的 data-t1/t2/t3 读取（编号 / 分类名 / 概述）
+          tip.querySelector('.t1').textContent = item.dataset.t1 || '';
+          tip.querySelector('.t2').textContent = item.dataset.t2 || '';
+          tip.querySelector('.t3').textContent = item.dataset.t3 || '';
+          placeTip();
+          tip.classList.add('show');
+        } else {
+          cancelAnimationFrame(tipRaf);
+          tip.classList.remove('show');
+        }
+      }
+
+      marqueeControllers.push(function () {
+        // 常态：一直滚动；仅当指针悬停在一张清晰可见的图上时暂停
+        let running = true;
+        let picked = null;
+        if (px !== null && cur === marqueeSlideIdx) {
+          const r = marquee.getBoundingClientRect();
+          const inMarquee = px >= r.left && px <= r.right && py >= r.top && py <= r.bottom;
+          if (inMarquee) {
+            const el = document.elementFromPoint(px, py);
+            const item = el && el.closest ? el.closest('.marquee-item') : null;
+            let inItem = false;
+            if (item) {
+              // 边缘渐隐区内的图（中心越过视口 9% 线）不算"选中"
+              // → 鼠标放在页面两边时依然保持滚动
+              const ir = item.getBoundingClientRect();
+              const cx = (ir.left + ir.right) / 2;
+              const fade = window.innerWidth * 0.09;   // 与 mask 8% 渐隐区对齐
+              inItem = cx > fade && cx < window.innerWidth - fade;
+              if (inItem) picked = item;
+            }
+            running = !inItem;
+          }
+        }
+        marqueeTrack.style.animationPlayState = running ? 'running' : 'paused';
+        setPicked(picked);
+      });
+
+      marqueeTrack.style.animationPlayState = 'running';
+    });
+    updateMarquee = function () {
+      marqueeControllers.forEach(function (f) { f(); });
+    };
+
+    window.addEventListener('mousemove', (e) => {
+      px = e.clientX; py = e.clientY;
+      updateMarquee();
+    }, { passive: true });
+
+    // 指针离开窗口：视为不在 marquee 内，回到滚动常态
+    document.addEventListener('mouseleave', () => {
+      px = null; py = null;
+      updateMarquee();
+    });
+
+    updateMarquee();
+  })();
+</script>
+
+</body>
+</html>
