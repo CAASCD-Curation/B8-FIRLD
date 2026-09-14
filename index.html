@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>田 · 四向档案 — Internal Field Archives</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ══════════ 00 开场：网格与 LOGO 初始动画 ══════════ -->
+<div id="preloader">
+  <div class="pre-grid" id="preGrid"></div>
+  <div class="pre-logo" id="preLogo">
+    <div class="pre-tian-frame">
+      <span class="pre-tian">田</span>
+    </div>
+  </div>
+  <div class="pre-meta mono">
+    <span>FIELD ARCHIVES</span>
+    <span><b id="preCount">000</b> / 209 条档案</span>
+  </div>
+</div>
+
+<!-- 全页网格列线（滚动叙事的底图） -->
+<div class="grid-lines" id="gridLines" aria-hidden="true"></div>
+
+<!-- 固定顶栏 -->
+<header id="topbar" class="mono">
+  <a class="tb-brand" href="#hero">田·档案 <sup>®</sup></a>
+  <nav class="tb-nav">
+    <a href="#route">路线</a>
+    <a href="#ch1">00 形式灵感</a>
+    <a href="#ch2">01 经典艺术</a>
+    <a href="#ch3">02 社会素材</a>
+    <a href="#ch0">03 文学意向</a>
+    <a href="#masonry">构图</a>
+  </nav>
+  <span class="tb-clock" id="clock">00:00:00</span>
+</header>
+
+<main id="main">
+
+  <!-- ══════════ HERO ══════════ -->
+  <section id="hero">
+    <div class="hero-top mono">
+      <span>关于「田」的四向档案</span>
+      <span>文学意向 × 形式灵感 × 经典艺术 × 社会素材</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="ht-char">田</span>
+      <span class="ht-latin">
+        <span class="ht-line">INTERNAL</span>
+        <span class="ht-line">FIELD</span>
+        <span class="ht-line">ARCHIVES</span>
+      </span>
+    </h1>
+
+    <div class="hero-map" id="heroMap">
+      <svg viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <g id="heroContours" fill="none" stroke="#c8401f" stroke-width="1" opacity="0.5"></g>
+        <g id="heroFields" fill="none" stroke="#1c1c1a" stroke-width="0.6" opacity="0.35"></g>
+      </svg>
+    </div>
+
+    <div class="hero-bottom mono">
+      <div class="hb-left">
+        <a href="#route">领土路线 Route</a>
+        <a href="#ch2">经典艺术 Artworks</a>
+        <a href="#masonry">瀑布构图 Masonry</a>
+      </div>
+      <div class="hb-mid" id="heroHint">[ 滚动开始 / SCROLL TO BEGIN ]</div>
+      <ul class="hb-right">
+        <li><a href="#ch1"><i>00</i> 形式灵感档案 <em>49</em></a></li>
+        <li><a href="#ch2"><i>01</i> 经典艺术档案 <em>50</em></a></li>
+        <li><a href="#ch3"><i>02</i> 社会素材档案 <em>60</em></a></li>
+        <li><a href="#ch0"><i>03</i> 文学意向档案 <em>50</em></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══════════ 领土路线可视化 ══════════ -->
+  <section id="route">
+    <div class="route-pin" id="routePin">
+      <div class="route-head mono">
+        <span>TERRITORIAL ROUTE</span>
+        <span>领土路线 — 从形式网格到文字之源</span>
+      </div>
+      <div class="route-body">
+        <div class="route-map">
+          <svg id="routeSvg" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet">
+            <g id="routeContours" fill="none" stroke="#1c1c1a" stroke-width="0.7" opacity="0.28"></g>
+            <g id="routeFields" fill="none" stroke="#1c1c1a" stroke-width="0.7" opacity="0.4"></g>
+            <path id="routePath" fill="none" stroke="#c8401f" stroke-width="2.5"
+              d="M 140 620 C 240 560 250 470 340 440 S 520 430 580 350 S 660 200 790 210 S 1010 260 1060 150" />
+            <g id="routeStops" class="mono"></g>
+          </svg>
+        </div>
+        <aside class="route-side">
+          <ol class="route-stops mono" id="routeStopList">
+            <li data-stop="0"><i>00</i><div><b>形式灵感档案</b><span>FORM INSPIRATIONS · 作为形式的田</span></div></li>
+            <li data-stop="1"><i>01</i><div><b>经典艺术档案</b><span>CLASSIC ARTWORKS · 被描绘的田</span></div></li>
+            <li data-stop="2"><i>02</i><div><b>社会素材档案</b><span>SOCIAL MATERIALS · 制度与现场的田</span></div></li>
+            <li data-stop="3"><i>03</i><div><b>文学意向档案</b><span>LITERARY INTENTIONS · 诗歌与辞赋中的田</span></div></li>
+          </ol>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 四大档案叙事区块 ══════════ -->
+  <section class="chapter" id="ch1">
+    <header class="ch-head">
+      <div class="ch-num mono">00</div>
+      <h2 class="ch-title">形式灵感档案</h2>
+      <div class="ch-meta mono"><span>FORM INSPIRATIONS</span><span>49 条 · 文字 / 景观 / 艺术 / 建筑 / 装置</span></div>
+      <p class="ch-lede">「田」即网格本身——从甲骨文的十字阡陌到曼哈顿的街区规划，一部形式迁移史。</p>
+    </header>
+    <div id="formGroups"></div>
+  </section>
+
+  <section class="chapter" id="ch2">
+    <header class="ch-head">
+      <div class="ch-num mono">01</div>
+      <h2 class="ch-title">经典艺术档案</h2>
+      <div class="ch-meta mono"><span>CLASSIC ARTWORKS</span><span>50 条 · 绘画 / 影像 / 艺术史现场</span></div>
+      <p class="ch-lede">勃鲁盖尔的收割、米勒的拾穗、梵高的麦田——艺术史凝视下的田野。</p>
+    </header>
+    <div class="art-list" id="artList"></div>
+  </section>
+
+  <section class="chapter" id="ch3">
+    <header class="ch-head">
+      <div class="ch-num mono">02</div>
+      <h2 class="ch-title">社会素材档案</h2>
+      <div class="ch-meta mono"><span>SOCIAL MATERIALS</span><span>60 条 · 制度 / 地景 / 当代现场</span></div>
+      <p class="ch-lede">井田、均田、鱼鳞图册、梯田与大地艺术节——「田」作为制度图形与社会现场。</p>
+    </header>
+    <div class="soc-list" id="socList"></div>
+  </section>
+
+  <section class="chapter" id="ch0">
+    <header class="ch-head">
+      <div class="ch-num mono">03</div>
+      <h2 class="ch-title">文学意向档案</h2>
+      <div class="ch-meta mono"><span>LITERARY INTENTIONS</span><span>50 条 · 先秦 — 当代</span></div>
+      <p class="ch-lede">从《诗经》的「雨我公田」到海子的麦地——两千年文学书写中，「田」的意象谱系。</p>
+    </header>
+    <div class="lit-list" id="litList"></div>
+  </section>
+
+  <!-- ══════════ 瀑布流式视觉构图 ══════════ -->
+  <section id="masonry">
+    <header class="ch-head">
+      <div class="ch-num mono">04</div>
+      <h2 class="ch-title">视觉构图</h2>
+      <div class="ch-meta mono"><span>VISUAL COMPOSITION OF TERRITORIES</span><span>图像 × 文本 混排瀑布流</span></div>
+    </header>
+    <div class="m-columns" id="mColumns"></div>
+  </section>
+
+</main>
+
+<!-- ══════════ 页脚：结束交互动画 ══════════ -->
+<footer id="end">
+  <div class="end-pin" id="endPin">
+    <div class="end-grid-wrap">
+      <div class="end-grid" id="endGrid"></div>
+      <div class="end-word mono" id="endWord">归档完成 · ARCHIVE COMPLETE</div>
+    </div>
+    <div class="end-meta mono">
+      <div class="em-col">
+        <span class="em-k">档案统计</span>
+        <span>文学意向 50 · 形式灵感 49</span>
+        <span>经典艺术 50 · 社会素材 60</span>
+      </div>
+      <div class="em-col">
+        <span class="em-k">索引</span>
+        <a href="#hero">回到顶部 TOP</a>
+        <a href="#route">领土路线 ROUTE</a>
+        <a href="#masonry">瀑布构图 MASONRY</a>
+      </div>
+      <div class="em-col">
+        <span class="em-k">时区</span>
+        <span id="footClock">--:--:--</span>
+        <span>中国 · 田野之上</span>
+      </div>
+    </div>
+    <div class="end-legal mono">
+      <span>内容源自四份「田」专题档案，分类与标签均保持原样</span>
+      <span>© 田·四向档案 2026 — GRID IS THE FIELD</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/gsap.min.js"></script>
+<script src="assets/js/ScrollTrigger.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
