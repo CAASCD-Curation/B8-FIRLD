@@ -1,48 +1,107 @@
 /* 田 · FIELD ARCHIVE —— 全局样式 */
 
-/* ---------- 进入加载动画：主题色四圆点循环波动 → 整页主题色从左向右切屏进入 ---------- */
+/* ---------- 开屏转场：品牌图形错落浮现 → 四色幕布上下交替掀起，渐次露出主页 ---------- */
 .loader-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #ffffff;
 }
-/* 切屏阶段：整页变主题色，随后整体从左向右滑出，露出下方已挂载的主页 */
-.loader-overlay--wipe {
-  background: #95d372;
-  animation: loader-wipe 0.75s cubic-bezier(0.76, 0, 0.24, 1) both;
+/* 幕布阶段：底层已挂载主页，遮罩本身透明，只留四条色带覆盖 */
+.loader-overlay:has(.loader-curtain) {
+  background: transparent;
 }
-@keyframes loader-wipe {
+
+/* 第一阶段：2×2 四色方块（站点 logo 母题）带回弹地依次浮现 */
+.loader-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.loader-mark {
+  display: grid;
+  grid-template-columns: repeat(2, 26px);
+  gap: 7px;
+}
+.loader-tile {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(20, 60, 40, 0.14);
+  animation: loader-tile-in 0.6s cubic-bezier(0.22, 1.45, 0.36, 1) backwards;
+}
+@keyframes loader-tile-in {
   from {
-    transform: translateX(0);
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
   }
   to {
-    transform: translateX(100%);
-  }
-}
-.loader-grid {
-  display: flex;
-  gap: 10px;
-}
-.loader-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #95d372;
-  animation: dot-wave 0.6s ease-in-out infinite;
-}
-@keyframes dot-wave {
-  0%,
-  100% {
-    transform: translateY(0) scale(0.85);
-    opacity: 0.45;
-  }
-  50% {
-    transform: translateY(-5px) scale(1.1);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
+  }
+}
+
+/* 字标下方一道呼吸感的主题色细线 */
+.loader-line {
+  width: 96px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #95d372, transparent);
+  opacity: 0;
+  animation: loader-line-in 0.7s ease backwards;
+}
+@keyframes loader-line-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+  to {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+}
+
+/* 第二阶段：四条象限色幕布，上-下-上-下交错掀起（ staggered curtain ） */
+.loader-curtain {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.loader-strip {
+  flex: 1;
+  will-change: transform;
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  animation-fill-mode: forwards;
+}
+.loader-strip:nth-child(odd) {
+  animation-name: loader-strip-up;
+}
+.loader-strip:nth-child(even) {
+  animation-name: loader-strip-down;
+}
+@keyframes loader-strip-up {
+  to {
+    transform: translateY(-101%);
+  }
+}
+@keyframes loader-strip-down {
+  to {
+    transform: translateY(101%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-tile,
+  .loader-line,
+  .loader-strip {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
   }
 }
 

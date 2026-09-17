@@ -186,6 +186,7 @@ export default function TopoBg() {
     <svg
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full select-none"
+      style={{ opacity: 0.7 }}
       viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="xMidYMid slice"
     >

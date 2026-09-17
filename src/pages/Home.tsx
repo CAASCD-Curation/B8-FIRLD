@@ -96,11 +96,11 @@ export default function Home() {
     [],
   )
 
-  // 进入加载动画：主题色四圆点循环波动 → 整页变主题色 → 主题色从左向右切屏进入主页
-  const [phase, setPhase] = useState<'loading' | 'wipe' | 'done'>('loading')
+  // 开屏转场：品牌图形（四色方块 + 字标）错落浮现 → 四色幕布上下交替掀起，渐次露出主页
+  const [phase, setPhase] = useState<'loading' | 'curtain' | 'done'>('loading')
   useEffect(() => {
-    const t1 = window.setTimeout(() => setPhase('wipe'), 600)
-    const t2 = window.setTimeout(() => setPhase('done'), 1350)
+    const t1 = window.setTimeout(() => setPhase('curtain'), 1150)
+    const t2 = window.setTimeout(() => setPhase('done'), 2350)
     return () => {
       window.clearTimeout(t1)
       window.clearTimeout(t2)
@@ -169,17 +169,34 @@ export default function Home() {
   return (
     <>
       {phase !== 'done' && (
-        <div
-          className={`loader-overlay ${phase === 'wipe' ? 'loader-overlay--wipe' : ''}`}
-          aria-hidden="true"
-        >
+        <div className="loader-overlay" aria-hidden="true">
           {phase === 'loading' && (
-            <div className="loader-grid">
-              {[0, 1, 2, 3].map((i) => (
+            <div className="loader-brand">
+              <div className="loader-mark">
+                {QUADRANTS.map((z, i) => (
+                  <span
+                    key={z}
+                    className="loader-tile"
+                    style={{
+                      backgroundColor: zoneSwatch(z),
+                      animationDelay: `${0.1 + i * 0.13}s`,
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="loader-line" style={{ animationDelay: '0.85s' }} />
+            </div>
+          )}
+          {phase === 'curtain' && (
+            <div className="loader-curtain">
+              {QUADRANTS.map((z, i) => (
                 <span
-                  key={i}
-                  className="loader-dot"
-                  style={{ animationDelay: `${i * 0.12}s` }}
+                  key={z}
+                  className="loader-strip"
+                  style={{
+                    backgroundColor: zoneSwatch(z),
+                    animationDelay: `${i * 0.09}s`,
+                  }}
                 />
               ))}
             </div>
@@ -509,10 +526,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 主视觉：田块拼贴地图（左 70%）+ 图例（右下角），整体下移 20% */}
+      {/* 主视觉：田块拼贴地图（左 70%）+ 图例（右下角），整体下移 30% */}
       <main
         className="relative mx-auto max-w-[1200px] px-6"
-        style={{ marginTop: '15.6vh' }}
+        style={{ marginTop: '20.3vh' }}
       >
         {/* 云层：覆盖整个页面居中 70% 区域，图层在田块之上（不拦截鼠标）；
             顶部裁切 96px，避免遮挡「田野们」背景字 */}
